@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="context" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.developerstack.edumanage.controller.LoginFormController">
+   <children>
+      <Label layoutX="33.0" layoutY="32.0" text="Login" textFill="#160cad">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+      </Label>
+      <Separator layoutX="31.0" layoutY="61.0" prefHeight="6.0" prefWidth="343.0" />
+      <TextField fx:id="txtEmail" layoutX="33.0" layoutY="88.0" prefHeight="31.0" prefWidth="325.0" promptText="Email" />
+      <Hyperlink layoutX="225.0" layoutY="186.0" onAction="#forgotPasswordOnAction" text="Forgot Password?" underline="true" />
+      <Button layoutX="31.0" layoutY="246.0" mnemonicParsing="false" onAction="#loginOnAction" prefHeight="40.0" prefWidth="325.0" text="Login" textFill="#471e94">
+         <font>
+            <Font name="System Bold Italic" size="15.0" />
+         </font>
+      </Button>
+      <Label layoutX="186.0" layoutY="294.0" text="OR" textFill="#160cad">
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+      </Label>
+      <Button layoutX="31.0" layoutY="329.0" mnemonicParsing="false" onAction="#createAnAccountOnAction" prefHeight="40.0" prefWidth="325.0" text="Create and Account" textFill="#471e94">
+         <font>
+            <Font name="System Bold Italic" size="15.0" />
+         </font>
+      </Button>
+      <ImageView fitHeight="408.0" fitWidth="244.0" layoutX="357.0" layoutY="-9.0" pickOnBounds="true" smooth="false">
+         <image>
+            <Image url="@../assets/03.png" />
+         </image>
+      </ImageView>
+      <PasswordField fx:id="txtPassword" layoutX="33.0" layoutY="138.0" prefHeight="31.0" prefWidth="325.0" promptText="Password" />
+   </children>
+</AnchorPane>

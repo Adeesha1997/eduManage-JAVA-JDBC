@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="teacherContext" prefHeight="609.0" prefWidth="885.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.developerstack.edumanage.controller.TeacherFormController">
+   <children>
+      <Label layoutX="53.0" layoutY="52.0" text="Teacher Management" textFill="#160cad">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+      </Label>
+      <Separator layoutX="51.0" layoutY="77.0" prefHeight="10.0" prefWidth="731.0" />
+      <Button layoutX="672.0" layoutY="37.0" mnemonicParsing="false" onAction="#backToHomeOnAction" text="Back To Home" />
+      <Button layoutX="536.0" layoutY="37.0" mnemonicParsing="false" onAction="#newTeacherOnAction" text="+ New Teacher" />
+      <TextField fx:id="txtId" editable="false" layoutX="51.0" layoutY="110.0" prefHeight="35.0" prefWidth="178.0" promptText="Teacher ID">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtName" layoutX="239.0" layoutY="110.0" prefHeight="35.0" prefWidth="178.0" promptText="Full Name">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtContact" layoutX="427.0" layoutY="110.0" prefHeight="35.0" prefWidth="178.0" promptText="Contact">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtAddress" layoutX="610.0" layoutY="110.0" prefHeight="35.0" prefWidth="178.0" promptText="Address">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="txtSearch" layoutX="51.0" layoutY="158.0" prefHeight="35.0" prefWidth="554.0" promptText="Search Here">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <Button fx:id="btn" layoutX="610.0" layoutY="158.0" mnemonicParsing="false" onAction="#saveOnAction" prefHeight="35.0" prefWidth="178.0" text="Save Teacher" />
+      <TableView fx:id="tblTeacher" layoutX="51.0" layoutY="209.0" prefHeight="351.0" prefWidth="740.0">
+        <columns>
+          <TableColumn fx:id="colId" prefWidth="132.0" text="#ID" />
+          <TableColumn fx:id="colName" prefWidth="192.0" text="Full Name" />
+            <TableColumn fx:id="colContact" prefWidth="103.0" text="Contact" />
+            <TableColumn fx:id="colAddress" prefWidth="155.0" text="Address" />
+            <TableColumn fx:id="colOption" prefWidth="155.0" text="Option" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>
