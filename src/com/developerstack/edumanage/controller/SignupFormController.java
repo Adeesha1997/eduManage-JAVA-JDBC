@@ -1,6 +1,7 @@
 package com.developerstack.edumanage.controller;
 
 import com.developerstack.edumanage.db.Database;
+import com.developerstack.edumanage.db.DbConnection;
 import com.developerstack.edumanage.model.User;
 import com.developerstack.edumanage.util.security.PasswordManager;
 import javafx.event.ActionEvent;
@@ -62,12 +63,8 @@ public class SignupFormController {
 
     //====Manage DB==========
     private boolean signup(User user) throws ClassNotFoundException, SQLException {
-        // Load the Driver
-        Class.forName("com.mysql.cj.jdbc.Driver"); // old Version -> com.mysql.jdbc.Driver  - > That Function already Deprecate
 
-        // Create the Connection
-        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
-
+        Connection connection = DbConnection.getInstance().getConnection();
         // Write a SQL Query
         /*String sql = "INSERT INTO user VALUES ('" + user.getEmail() + "','" + user.getFirstName() + "','" + user.getLastName() + "','" + user.getPassword() + "')";*/
         String sql= "INSERT INTO user VALUES (?,?,?,?)";
