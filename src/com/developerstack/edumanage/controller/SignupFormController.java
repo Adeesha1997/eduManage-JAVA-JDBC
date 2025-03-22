@@ -79,7 +79,7 @@ public class SignupFormController {
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1,user.getEmail());
         statement.setString(2,user.getFirstName());
-        statement.setString(2,user.getLastName());
+        statement.setString(3,user.getLastName());
         statement.setString(4,user.getPassword());
 
         //Set Sql into the statement & Execute

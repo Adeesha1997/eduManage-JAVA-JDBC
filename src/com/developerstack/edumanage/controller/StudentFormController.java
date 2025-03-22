@@ -14,11 +14,14 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public class StudentFormController {
@@ -41,54 +44,42 @@ public class StudentFormController {
 
     public void saveOnAction(ActionEvent actionEvent) {
 
+        Student student = new Student(
+                txtId.getText(),
+                txtName.getText(),
+                Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                txtAddress.getText()
+        );
+
         if (btn.getText().equalsIgnoreCase("Save Student")) {
-            Student student = new Student(
-                    txtId.getText(),
-                    txtName.getText(),
-                    Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                    txtAddress.getText()
-            );
 
-            Database.studentTable.add(student);
-            setStudentId();
-            clear();
-            setTableData(searchText);
-            new Alert(Alert.AlertType.INFORMATION, "Student Saved!!").show();
-        } else {
-
-
-           /* Optional<Student> selectedStudent = Database.studentTable.stream().filter(e -> e.getStudentId().equals(txtId.getText())).findFirst();
-            if (!selectedStudent.isPresent()){
-                new Alert(Alert.AlertType.WARNING,"Student Not Found!!").show();
-                return;
-            }else{
-             // Update Code
-               selectedStudent.setAddress(txtAddress.getText());
-                    selectedStudent.setFullName(txtName.getText());
-                    selectedStudent.setDateOfBirth(Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                    setTableData();
-                    clear();
+            try {
+                if (saveStudent(student)) {
                     setStudentId();
-                    new Alert(Alert.AlertType.INFORMATION, "Student Updated!!").show();
-            }*/
-
-            for (Student st : Database.studentTable
-            ) {
-                if (st.getStudentId().equals(txtId.getText())) {
-                    // Update Code
-                    st.setAddress(txtAddress.getText());
-                    st.setFullName(txtName.getText());
-                    st.setDateOfBirth(Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    clear();
                     setTableData(searchText);
-                    clear();
-                    setStudentId();
-                    btn.setText("Save Student");
-                    new Alert(Alert.AlertType.INFORMATION, "Student Updated!!").show();
-                    return;
+                    new Alert(Alert.AlertType.INFORMATION, "Student Saved!!").show();
+                } else {
+                    new Alert(Alert.AlertType.WARNING, "Please Try Again!!").show();
                 }
+            } catch (ClassNotFoundException | SQLException e) {
+                new Alert(Alert.AlertType.ERROR, e.toString()).show();
             }
 
-            new Alert(Alert.AlertType.WARNING, "Student Not Found!!").show();
+        } else {
+            try {
+                if (updateStudent(student)) {
+                    setStudentId();
+                    clear();
+                    setTableData(searchText);
+                    btn.setText("Save Student");
+                    new Alert(Alert.AlertType.INFORMATION, "Student Updated!!").show();
+                } else {
+                    new Alert(Alert.AlertType.WARNING, "Please Try Again!!").show();
+                }
+            } catch (ClassNotFoundException | SQLException e) {
+                new Alert(Alert.AlertType.ERROR, e.toString()).show();
+            }
 
         }
 
@@ -131,12 +122,10 @@ public class StudentFormController {
     }
 
     private void setTableData(String searchText) {
-
         ObservableList<StudentTm> obList = FXCollections.observableArrayList();
-        for (Student st : Database.studentTable
-        ) {
-
-            if (st.getFullName().contains(searchText)) {
+        try {
+            for (Student st : searchStudents(searchText)
+            ) {
                 Button btn = new Button("Delete");
                 StudentTm tm = new StudentTm(
                         st.getStudentId(),
@@ -156,38 +145,47 @@ public class StudentFormController {
 
                     Optional<ButtonType> buttonType = alert.showAndWait();
                     if (buttonType.get().equals(ButtonType.YES)) {
-                        Database.studentTable.remove(st);
-                        new Alert(Alert.AlertType.INFORMATION, "Deleted!").show();
-                        setTableData(searchText);
-                        setStudentId();
+                        try {
+                            if(deleteStudent(st.getStudentId())){
+                                new Alert(Alert.AlertType.INFORMATION, "Deleted!").show();
+                                setTableData(searchText);
+                                setStudentId();
+                                clear();
+                            }else{
+                                new Alert(Alert.AlertType.WARNING, "Please Try Again!!!!").show();
+                            }
+                        } catch (ClassNotFoundException | SQLException ex) {
+                            new Alert(Alert.AlertType.WARNING, e.toString()).show();
+                        }
                     }
-
                 });
                 obList.add(tm);
             }
 
+            tblStudent.setItems(obList);
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
         }
-
-        tblStudent.setItems(obList);
     }
 
     private void setStudentId() {
-        if (!Database.studentTable.isEmpty()) {
-            Student lastStudent = Database.studentTable.get(
-                    Database.studentTable.size() - 1
-            );
+        try {
+            String lastId = getLastId();
+            if (lastId != null) {
+                String splitData[] = lastId.split("-");
+                String lastIdIntegerNumberAsAString = splitData[1];
+                int lastIntegerIdAsInt = Integer.parseInt(lastIdIntegerNumberAsAString);
+                lastIntegerIdAsInt++;
+                String generatedStudentId = "S-" + lastIntegerIdAsInt;
+                txtId.setText(generatedStudentId);
 
-            String lastId = lastStudent.getStudentId();
-            String splitData[] = lastId.split("-");
-            String lastIdIntegerNumberAsAString = splitData[1];
-            int lastIntegerIdAsInt = Integer.parseInt(lastIdIntegerNumberAsAString);
-            lastIntegerIdAsInt++;
-            String generatedStudentId = "S-" + lastIntegerIdAsInt;
-            txtId.setText(generatedStudentId);
-
-        } else {
-            txtId.setText("S-1");
+            } else {
+                txtId.setText("S-1");
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
+
     }
 
     private void clear() {
@@ -211,6 +209,82 @@ public class StudentFormController {
 
     public void backToHomeOnAction(ActionEvent actionEvent) throws IOException {
         setUi("DashboardForm");
+    }
+
+    private boolean saveStudent(Student student) throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
+
+        PreparedStatement statement = connection.prepareStatement("INSERT INTO student VALUES (?,?,?,?)");
+
+        statement.setString(1, student.getStudentId());
+        statement.setString(2, student.getFullName());
+        statement.setObject(3, student.getDateOfBirth());
+        statement.setString(4, student.getAddress());
+
+        return statement.executeUpdate() > 0;
+    }
+
+    private String getLastId() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
+
+        PreparedStatement statement = connection.prepareStatement("SELECT student_id FROM student ORDER BY CAST(SUBSTRING(student_id,3) AS UNSIGNED)  DESC");
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getString(1);
+        }
+        return null;
+    }
+
+    private List<Student> searchStudents(String text) throws ClassNotFoundException, SQLException {
+        text = "%" + text + "%";
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
+
+        PreparedStatement statement =
+                connection.prepareStatement("SELECT * FROM student WHERE full_name LIKE ? OR address LIKE ?");
+        statement.setString(1, text);
+        statement.setString(2, text);
+
+        ResultSet resultSet = statement.executeQuery();
+
+
+
+        List<Student> list = new ArrayList<>();
+        while (resultSet.next()) {
+            list.add(
+                    new Student(
+                            resultSet.getString(1),
+                            resultSet.getString(2),
+                            resultSet.getDate(3),
+                            resultSet.getString(4)
+                    ));
+        }
+
+        return list;
+    }
+
+    private boolean deleteStudent(String id) throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
+
+        PreparedStatement statement =
+                connection.prepareStatement("DELETE FROM student WHERE student_id=?");
+        statement.setString(1, id);
+        return statement.executeUpdate()>0;
+    }
+
+    private boolean updateStudent(Student student) throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
+
+        PreparedStatement statement = connection.prepareStatement("UPDATE student SET full_name=?, dob=?, address=? WHERE student_id=?");
+        statement.setString(1, student.getFullName());
+        statement.setObject(2, student.getDateOfBirth());
+        statement.setString(3, student.getAddress());
+        statement.setString(4, student.getStudentId());
+        return statement.executeUpdate() > 0;
     }
 }
 
